@@ -13,8 +13,16 @@ contract Election {
     mapping(uint => Candidate) public candidates;
     uint public candidatesCount;
 
+    // Keep track of who has voted
+    mapping(address => bool) public voters;
+
+    event votedEvent(
+        uint indexed candidateId
+    );
+
+
     // Constructor
-    constructor () public{
+    constructor() public{
         addCandidate("foo");
         addCandidate("faa");
     }
@@ -22,5 +30,17 @@ contract Election {
     function addCandidate (string memory name) private {
         candidatesCount ++;
         candidates[candidatesCount] = Candidate(candidatesCount, name, 0);
+    }
+
+    function vote(uint candidateId) public {
+
+        require(!voters[msg.sender]);
+        require(candidateId > 0 && candidateId <= candidatesCount);
+        // Solidity allows us to also add meta data 
+        voters[msg.sender] = true;
+        // Cast vote
+        candidates[candidateId].voteCount++;
+
+        emit votedEvent(candidateId);
     }
 }
